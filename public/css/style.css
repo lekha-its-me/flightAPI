@@ -1,0 +1,13 @@
+.main-title {
+    margin-top: 30px;
+    width: 100%;
+}
+
+.main-title > p {
+    text-align: center;
+}
+
+.search-form {
+    justify-content: center;
+    display: flex;
+}
