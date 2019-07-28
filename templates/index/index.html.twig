@@ -9,31 +9,38 @@
                 <form class="form-inline">
                     <div class="form-group">
                         <label for="exampleFormControlSelect1">Откуда</label>
-                        <select class="form-control" id="exampleFormControlSelect1">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
+                        <select class="form-control" id="from">
+                            {% for item in airports %}
+                                <option value="{{ item.getCode() }}">{{ item.getName() }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="exampleFormControlSelect1">Куда</label>
-                        <select class="form-control" id="exampleFormControlSelect1">
-                            <option>1</option>
-                            <option>2</option>
-                            <option>3</option>
-                            <option>4</option>
-                            <option>5</option>
+                        <select class="form-control" id="to">
+                            {% for item in airports %}
+                                <option value="{{ item.getCode() }}">{{ item.getName() }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="exampleFormControlInput1">Когда</label>
-                        <input type="date" class="form-control" id="exampleFormControlInput1">
+                        <input type="date" class="form-control" id="date">
                     </div>
-                    <button type="submit" class="btn btn-primary">Найти рейсы</button>
+                    <button type="button" id="findRoutes" class="btn btn-primary">Найти рейсы</button>
                 </form>
             </div>
+        </div>
+    </div>
+    <div class="row info_message"></div>
+    <div class="row">
+        <div class="founded_data">
+            <table class="table table-hover">
+                <thead><tr><th>Перевозчик</th><th>Номер рейса</th><th>Аэропорт вылета</th><th>Аэропорт прибытия</th><th>Время вылета</th><th>Время прибытия</th><th>Длительность</th></tr></thead>
+                <tbody id="result_body">
+
+                </tbody>
+            </table>
         </div>
     </div>
 {% endblock %}

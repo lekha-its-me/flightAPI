@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Shedules;
+use App\Exceptions\NotFoundException;
+use App\Exceptions\WrongAirportNameExcpertion;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -14,37 +16,55 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ShedulesRepository extends ServiceEntityRepository
 {
-    public function __construct(RegistryInterface $registry)
+    public function __construct(RegistryInterface $registry, AirportsRepository $airportsRepository, FlightsRepository $flightsRepository)
     {
         parent::__construct($registry, Shedules::class);
+        $this->airportsRepositiry = $airportsRepository;
+        $this->flightsRepository = $flightsRepository;
+
     }
 
-    // /**
-    //  * @return Shedules[] Returns an array of Shedules objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findRoute($from, $to, $date)
+    {
+        $departureAirport = $this->airportsRepositiry->findOneByCode($from);
+        $arrivalAirport = $this->airportsRepositiry->findOneByCode($to);
+        if (is_null($departureAirport) || is_null($arrivalAirport)) {
+            throw new WrongAirportNameExcpertion('Неверное указано имя аэропорта', '400');
+        }
+
+        $result = $this->findByFields($departureAirport, $arrivalAirport, $date);
+        if(\count($result) > 0){
+            return $result;
+        }
+
+        throw new NotFoundException('Маршрут не найден', 404);
+
+    }
+
+    public function findByFields($from, $to, $date)
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('s.id', 'ASC')
-            ->setMaxResults(10)
+            ->andWhere('s.departure_airport_id = :from')
+            ->setParameter('from', $from->getId())
+            ->andWhere('s.arrival_airport_id = :to')
+            ->setParameter('to', $to->getId())
+            ->andWhere('s.departure_datetime >= :fromDate')
+            ->setParameter('fromDate', $this->addFromTime($date))
+            ->andWhere('s.departure_datetime <= :toDate')
+            ->setParameter('toDate', $this->addToTime($date))
+            ->orderBy('s.departure_datetime')
             ->getQuery()
             ->getResult()
-        ;
+            ;
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Shedules
+    private function addFromTime($date)
     {
-        return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        return $date . ' 00:00:00';
     }
-    */
+
+    private function addToTime($date)
+    {
+        return $date . ' 23:59:59';
+    }
 }
