@@ -17,6 +17,10 @@ $(document).ready(function () {
             url: '/search',
             data: "searchQuery=" + JSON.stringify(data),
             dataType: 'json',
+            headers: {
+                "login":"test_user",
+                "password":"My+1VeryHardPass23"
+            },
             success: function(data) {
                 $(".founded_data").hide();
                 $("#result_body").empty();

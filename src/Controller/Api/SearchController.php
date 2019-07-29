@@ -11,19 +11,24 @@ namespace App\Controller\Api;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\WrongDateException;
 use App\Mappers\ShedulesMapper;
+use App\Repository\UsersRepository;
 use App\Validators\DateValidator;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\ShedulesRepository;
+use App\Auth\AuthenticationHelper;
+use App\Exceptions\AuthException;
 
 
 class SearchController
 {
-    public function __construct(ShedulesRepository $shedulesRepository, ShedulesMapper $shedulesMapper)
+    public function __construct(ShedulesRepository $shedulesRepository, ShedulesMapper $shedulesMapper, UsersRepository $usersRepository)
     {
         $this->shedulesRepository = $shedulesRepository;
         $this->shedulesMapper = $shedulesMapper;
+        $this->shedulesMapper = $shedulesMapper;
+        $this->usersRepository = $usersRepository;
     }
 
     /**
@@ -31,9 +36,19 @@ class SearchController
      */
     public function search(Request $request)
     {
+        $authenticationHelper = new AuthenticationHelper($this->usersRepository, $request);
+
+        $credentials['login'] = $request->headers->get('login');
+        $credentials['password'] = $request->headers->get('password');
+
+        if(!$authenticationHelper->authenticate($credentials)){
+            return new Response('Неверные логин или пароль', 401);
+        }
+
         $data = $request->request->get('searchQuery');
         $data = json_decode($data);
         $dateValidator = new DateValidator();
+
         if(!$dateValidator->validate($data->departureDate)) {
             throw new WrongDateException('Неверное указана дата', 400);
         }
